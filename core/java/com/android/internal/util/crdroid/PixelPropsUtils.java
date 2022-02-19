@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2020 The Pixel Experience Project
- *               2021-2022 crDroid Android Project
+ *               2021 crDroid Android Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Map;
 
 public class PixelPropsUtils {
 
+    public static final String PACKAGE_GMS = "com.google.android.gms";
     private static final String TAG = PixelPropsUtils.class.getSimpleName();
     private static final boolean DEBUG = false;
 
@@ -61,23 +62,10 @@ public class PixelPropsUtils {
             "com.samsung.android.waterplugin"
     };
 
-    private static final String[] packagesToKeep = {
-        "com.google.android.GoogleCamera",
-        "com.google.android.GoogleCamera.Cameight",
-        "com.google.android.GoogleCamera.Go",
-        "com.google.android.GoogleCamera.Urnyx",
-        "com.google.android.GoogleCameraAsp",
-        "com.google.android.GoogleCameraCVM",
-        "com.google.android.GoogleCameraEng",
-        "com.google.android.GoogleCameraEng2",
-        "com.google.android.MTCL83",
-        "com.google.android.UltraCVM",
-        "com.google.android.apps.cameralite",
-        "com.google.android.dialer",
-        "com.google.ar.core",
-        "com.google.android.youtube",
-        "com.google.android.apps.youtube.kids",
-        "com.google.android.apps.youtube.music"
+    private static final Map<String, ArrayList<String>> propsToKeep;
+    private static final String[] extraPackagesToChange = {
+            "com.android.chrome",
+            "com.breel.wallpapers20"
     };
 
     private static final Map<String, Object> propsToChangeROG1;
@@ -112,12 +100,16 @@ public class PixelPropsUtils {
             "com.epicgames.portal"
     };
 
+    private static ArrayList<String> allProps = new ArrayList<>(Arrays.asList("BRAND", "MANUFACTURER", "DEVICE", "PRODUCT", "MODEL", "FINGERPRINT"));
+
     private static volatile boolean sIsGms = false;
 
     static {
         propsToKeep = new HashMap<>();
         propsToChange = new HashMap<>();
         propsToKeep.put("com.google.android.settings.intelligence", new ArrayList<>(Collections.singletonList("FINGERPRINT")));
+        propsToKeep.put("com.google.android.GoogleCamera", allProps);
+        propsToKeep.put("com.google.android.dialer", allProps);
         propsToChangePixel6 = new HashMap<>();
         propsToChangePixel6.put("BRAND", "google");
         propsToChangePixel6.put("MANUFACTURER", "Google");
@@ -153,8 +145,8 @@ public class PixelPropsUtils {
         if (packageName == null) {
             return;
         }
-        if ((packageName.startsWith("com.google.") && !Arrays.asList(packagesToKeep).contains(packageName))
-                || Arrays.asList(extraPackagesToChange).contains(packageName)) {
+        if (packageName.startsWith("com.google.") || Arrays.asList(extraPackagesToChange).contains(packageName)) {
+            Map<String, Object> propsToChange = propsToChangePixel6;
 
             if (Arrays.asList(packagesToChangePixel6).contains(packageName)) {
                 propsToChange.putAll(propsToChangePixel6);
@@ -175,7 +167,7 @@ public class PixelPropsUtils {
                 if (DEBUG) Log.d(TAG, "Defining " + key + " prop for: " + packageName);
                 setPropValue(key, value);
             }
-            if (packageName.equals("com.google.android.gms")) {
+            if (packageName.equals(PACKAGE_GMS)) {
                 sIsGms = true;
             }
             // Set proper indexing fingerprint
